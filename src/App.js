@@ -1,24 +1,53 @@
-import logo from './logo.svg';
-import './App.css';
+import { useEffect, useState } from "react";
+import Todos from "./components/Todos";
+import TodoFooter from "./components/TodoFooter";
+import TodoForm from "./components/TodoForm";
 
 function App() {
+  const savedTodos = JSON.parse(localStorage.getItem("todos")) || [];
+  const [todos, setTodos] = useState(savedTodos);
+
+  useEffect(() => {
+    localStorage.setItem("todos", JSON.stringify(todos));
+  }, [todos]);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <TodoForm
+        onAdd={(text) => {
+          setTodos([
+            ...todos,
+            {
+              id: Math.random(),
+              text,
+              isCompleted: false,
+            },
+          ]);
+        }}
+      />
+      <Todos
+        todos={todos}
+        onDelete={(todo) => {
+          setTodos(todos.filter((t) => t.id !== todo.id));
+        }}
+        onChange={(newTodo) => {
+          setTodos(
+            todos.map((todo) => {
+              if (todo.id === newTodo.id) {
+                return newTodo;
+              }
+              return todo;
+            })
+          );
+        }}
+      />
+      <TodoFooter
+        todos={todos}
+        onClearCompleted={() => {
+          setTodos(todos.filter((todo) => !todo.isCompleted));
+        }}
+      />
+    </>
   );
 }
 
